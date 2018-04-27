@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>chat.html</title>
+    <meta charset="UTF-8">
+    <meta name="keywords" content="keyword1,keyword2,keyword3">
+    <meta name="description" content="this is my page">
+    <meta name="content-type" content="text/html; charset=UTF-8">
+    <style type="text/css">
+    	input#chat
+    	{
+    		width:410px
+        }
+        #console-container
+        {
+        	width:400px;
+        }
+        #console
+        {
+        	border:1px solid #CCCCCC;
+            border-right-color:#999999;
+            border-bottom-color:#999999;
+            height:170px;
+            overflow-y:scroll;
+            padding:5px;
+            width:100%;
+        }
+        #console p
+        {
+            padding:0;
+            margin:0;
+        }
+    </style>
+    <script type="text/javascript">
+		var audioContext=new (window.AudioContext || window.webkitAudioContext)();
+    	var Chat={};
+    	Chat.socket=null;
+    	Chat.connect=(function(host)
+    	{
+    		if("WebSocket" in window)
+    		{
+    			Chat.socket=new WebSocket(host);
+            }
+            else if("MozWebSocket" in window)
+            {
+                Chat.socket=new MozWebSocket(host);
+            }
+            else
+            {
+                Console.log("Error: WebSocket is not supported by this browser.");
+                return;
+            }
+            Chat.socket.onopen=function()
+            {
+                Console.log("Info: WebSocket connection opened.");
+                document.getElementById("chat").onkeydown=function(event)
+                {
+                    if(event.keyCode==13)
+                    {
+                        Chat.sendMessage();
+                    }
+                };
+            };
+            Chat.socket.onclose=function()
+            {
+            	document.getElementById("chat").onkeydown=null;
+                Console.log("Info: WebSocket closed.");
+            };
+            Chat.socket.onmessage=function(message)
+            {
+                //Console.log(message.data);
+                /*
+                if(typeof(message.data)=="string")
+                {
+                	Console.log(message.data);
+                }
+                else
+                {
+                	var reader=new FileReader();
+                	var imgDiv=document.getElementById("imgDiv");
+                	imgDiv.innerHTML="";
+                	reader.onload=function(event)
+                	{
+                		if(event.target.readyState==FileReader.DONE)
+                		{
+                			//var picdata=event.target.result;
+							//img.innerHTML="<img src='"+picdata+"'/>";
+							var image=new Image();
+							image.src=event.target.result; // 显示图片的地方
+							imgDiv.appendChild(image);
+						}
+					};
+					reader.readAsDataURL(message.data);
+				}
+				*/
+				var reader=new FileReader();
+				reader.onload=function(evt)
+            	{
+            		if(evt.target.readyState==FileReader.DONE)
+                	{
+                		audioContext.decodeAudioData(evt.target.result,function(buffer)
+                		{
+                			//解码成pcm流
+                            var audioBufferSouceNode=audioContext.createBufferSource();
+                            audioBufferSouceNode.buffer=buffer;
+                            audioBufferSouceNode.connect(audioContext.destination);
+                            audioBufferSouceNode.start(0);
+                        },
+                        function(e)
+                        {
+                        	console.log(e);
+                        });
+                        /*
+                        var source=audioContext.createBufferSource(); // creates a sound source
+  						source.buffer=evt.target.result;                    // tell the source which sound to play
+  						source.connect(audioContext.destination);       // connect the source to the context's destination (the speakers)
+  						source.start(0);
+  						*/
+                	}
+            	};
+            	reader.readAsArrayBuffer(message.data);
+            };
+        });
+        Chat.initialize=function()
+        {
+        	if(window.location.protocol=="http:")
+        	{
+                Chat.connect("ws://"+window.location.host+"/lwzz/websocket/chat?cs=cwt");
+            }
+            else
+            {
+                Chat.connect("wss://"+window.location.host+"/lwzz/websocket/chat");
+            }
+        };
+        Chat.sendMessage=(function()
+        {
+            var message=document.getElementById("chat").value;
+            if(message!="")
+            {
+                Chat.socket.send(message);
+                document.getElementById("chat").value="";
+            }
+        });
+        var Console={};
+        Console.log=(function(message)
+        {
+        	var console=document.getElementById("console");
+            var p=document.createElement("p");
+            p.style.wordWrap="break-word";
+            p.innerHTML=message;
+            console.appendChild(p);
+            while(console.childNodes.length>25)
+            {
+            	console.removeChild(console.firstChild);
+            }
+            console.scrollTop=console.scrollHeight;
+        });
+        Chat.initialize();
+    </script>
+  </head>
+  <body>
+    <noscript>
+    	<h2 style="color: #ff0000">
+    		Seems your browser doesn't support Javascript!
+    		Websockets rely on Javascript being enabled. Please enable
+    		Javascript and reload this page!
+    	</h2>
+    </noscript>
+    <div>
+    	<p>
+    		<input type="text" placeholder="type and press enter to chat" id="chat">
+    	</p>
+    	<div id="console-container">
+        	<div id="console"></div>
+    	</div>
+	</div>
+	<div id="imgDiv" style="border-left-width:0px;margin-left:450px;margin-top:0px;padding-top:30px;">
+	</div>
+  </body>
+</html>

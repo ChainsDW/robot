@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<!-- saved from url=(0061)http://chrome.360.cn/html5_labs/demos/mediacapture/index.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+  <meta name="keywords" content="360极速浏览器,HTML5实验室">
+  <meta name="description" content="360极速浏览器 HTML5实验室">
+  <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+  <title>网页摄像头 (Media Capture)- 360极速浏览器 HTML5实验室</title>
+  <style>
+    #video_stream {
+      width: 400px;
+      border: 8px inset silver;
+    }
+    #video_box {
+      display: none;
+      margin-top: 30px;
+    }
+    #msg_box {
+     text-align: left;
+     padding: 18px;
+     line-height: 1.6;
+    }
+  </style>
+  <!--[if lt IE 9]>
+{#  <script src="http://chrome.360.cn/HTML5_labs/common/html5shiv.js"></script>#}
+  <![endif]-->
+</head>
+<body>
+  <div class="lab_page">
+    <div id="header">
+      <h1>HTML5 实验室</h1>
+      <div id="demo_area">
+        <button id="launch_button">打开我的摄像头</button>
+        <div id="msg_box" style="display: block;"><b>请点击“允许”按钮，授权网页访问您的摄像头！</b><br>若您并未看到任何授权提示，则表示您的浏览器不支持Media Capture或您的机器没有连接摄像头设备。</div>
+        <div id="video_box" style="display: none;"><video id="video_stream" autoplay=""></video></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Normalizes window.URL
+    window.URL = window.URL || window.webkitURL || window.msURL || window.oURL;
+
+    // Normalizes navigator.getUserMedia
+    navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia
+                           || navigator.mozGetUserMedia || navigator.msGetUserMedia;
+
+    function isChromiumVersionLower() {
+      var ua = navigator.userAgent;
+      var testChromium = ua.match(/AppleWebKit\/.* Chrome\/([\d.]+).* Safari\//);
+      if (!testChromium) return false;
+
+      var rltArray = testChromium[1].split('.');
+      return ((parseInt(rltArray[0]) < 18) || ((parseInt(rltArray[0]) == 18) && (parseInt(rltArray[1]) == 0) && (parseInt(rltArray[2]) < 966)));
+    }
+
+    function showErrorMsg(error_details) {
+      document.getElementById('error_details').innerHTML = error_details;
+      document.getElementById('error_msg').style.display = 'block';
+      document.getElementById('demo_area').style.display = 'none';
+    }
+
+    function successsCallback(stream) {
+      document.getElementById('msg_box').style.display = 'none';
+      document.getElementById('video_box').style.display = 'block';
+      document.getElementById('video_stream').src = (window.URL && window.URL.createObjectURL) ? window.URL.createObjectURL(stream) : stream;
+      {#var chatSocket = new WebSocket(#}
+      {#  'ws://' + window.location.host +#}
+      {#  '/ws/chat/' + roomName + '/');#}
+    }
+
+    function errorCallback(err) {
+      console.log(err);
+    }
+
+    function accessLocalWebCam() {
+      document.getElementById('video_box').style.display = 'none';
+      document.getElementById('msg_box').style.display = 'block';
+      try {
+        // Tries it with spec syntax
+        navigator.getUserMedia({ video: true }, successsCallback, errorCallback);
+      } catch (err) {
+        console.log(err);
+        // Tries it with old spec of string syntax
+        navigator.getUserMedia('video', successsCallback, errorCallback);
+      }
+    }
+
+    if (isChromiumVersionLower()) {
+      showErrorMsg('内核版本较低，可能无法支持 getUserMedia 接口');
+    } else if (!navigator.getUserMedia) {
+      showErrorMsg('不支持 getUserMedia 接口');
+    } else {
+      document.getElementById('launch_button').addEventListener('click', accessLocalWebCam, false);
+    }
+  </script>
+</body></html>

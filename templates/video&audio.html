@@ -1,0 +1,110 @@
+<html>
+
+<head>
+
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+    <title>live cam 录像页面</title>
+
+</head>
+
+<body>
+
+    <video autoplay id="sourcevid" style="width:640px;height:480px"></video>
+    <br>
+
+    提示：最好用火狐测试，谷歌浏览器升级了安全策略，谷歌浏览器只能在https下才能利用html5打开摄像头。
+
+
+
+    <canvas width="640" height="480" id="output" style="display:none"></canvas>
+
+    <script src="/static/jquery-3.3.1.js"></script>
+    <script src="/static/main.js"></script>
+    <script type="text/javascript" charset="utf-8">
+
+
+
+        var socket = new WebSocket('ws://' + window.location.host +#}
+        {#'/ws/video/');#}
+
+        var back = document.getElementById('output');
+
+        var backcontext = back.getContext('2d');
+
+        var video = document.getElementsByTagName('video')[0];
+
+
+
+        var success = function(stream){
+
+            video.src = window.URL.createObjectURL(stream);
+
+        };
+
+
+        function startRecording(stream) {
+            recorder = new MediaRecorder(stream);
+            recorder.ondataavailable = function (evt) {
+                videoBlob = new Blob([evt.data],{type:evt.data.type})
+            };
+            recorder.start();
+            setTimeout(function () {
+                console.log('录像结束');
+                recorder.stop();
+                console.log(recorder)
+            },10000)
+        }
+        var draw = function(){
+
+            try{
+
+                backcontext.drawImage(video,0,0, back.width, back.height);
+
+            }catch(e){
+
+                if (e.name == "NS_ERROR_NOT_AVAILABLE") {
+
+                    return setTimeout(draw, 100);
+
+                } else {
+
+                    throw e;
+
+                }
+
+            }
+
+            if(video.src){
+                var file_obj = new FormData();
+                file_obj.append('img',back.toDataURL("image/jpg", 0.5));
+                startRecording();
+                // var gg=JSON.stringify('class');
+                // socket.send(back.toDataURL("image/jpeg", 0.5));
+                var xmlHttp = new XMLHttpRequest();
+                xmlHttp.open('post', '/video/',true);
+                xmlHttp.send(file_obj);
+                xmlHttp.onreadystatechange=function () {
+
+                };
+                // socket.send(gg);
+
+            }
+
+            setTimeout(draw, 100);
+
+        };
+        {#setInterval(draw, 100);#}
+        draw();
+
+        navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia ||
+
+        navigator.mozGetUserMedia || navigator.msGetUserMedia;
+
+        navigator.getUserMedia({video:true, audio:true}, success, console.log);
+
+    </script>
+
+</body>
+
+</html>

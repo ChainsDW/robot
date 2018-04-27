@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        *{
+          margin: 0;
+        }
+        html,body{
+            height: 100%;
+            width: 100%;
+        }
+        body{
+            background: url("../static/background.jpg") 100% 100%;
+            background-size: 100% 100%;
+        }
+        #background{
+            position: fixed;
+            left: 20%;
+            right: 20%;
+            top: 20%;
+            bottom: 20%;
+        }
+        #background .menu_bottom{
+            float: left;
+            margin-left: 10%;
+            margin-top: 10%;
+            display: inline-block;
+            height: 150px;
+            width: 150px;
+        }
+        #background #a1{
+            background: url("../static/settings.png") 150px 150px;
+            background-size: 150px 150px;
+        }
+        #background #a2{
+            background: url("../static/speech_balloon.png") 150px 150px;
+            background-size: 150px 150px;
+        }
+        #background #a3{
+            background: url("../static/help.png") 150px 150px;
+            background-size: 150px 150px;
+        }
+        #background .menu_bottom:hover{
+            opacity: 0.5;
+        }
+
+    </style>
+</head>
+<body>
+<div id="background">
+    <a href="#" class="menu_bottom" id="a1"></a>
+    <a href="#" class="menu_bottom" id="a2"></a>
+    <a href="#" class="menu_bottom" id="a3"></a>
+</div>
+<script src="/static/jquery-3.3.1.js"></script>
+</body>
+</html>
